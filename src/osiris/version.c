@@ -1,6 +1,6 @@
 #include <cerver/utils/log.h>
 
-#include "version.h"
+#include "osiris/version.h"
 
 // print full osiris version information
 void osiris_version_print_full (void) {
