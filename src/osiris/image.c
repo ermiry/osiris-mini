@@ -1,12 +1,13 @@
 #include <stdlib.h>
 
-#include "osiris/image.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "osiris/stb/image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "osiris/stb/image_write.h"
+
+#include "osiris/image.h"
+#include "osiris/utils.h"
 
 Image *image_new (void) {
 
@@ -185,6 +186,21 @@ Image *image_load_color (const char *filename, int w, int h) {
 
 }
 
+float image_get_pixel (Image *im, int x, int y, int c) {
+
+	return (x < im->w && y < im->h && c < im->c) ?
+		im->data[c * im->h * im->w + y * im->w + x] : 0;
+
+}
+
+void image_set_pixel (Image *im, int x, int y, int c, float val) {
+
+	if (!(x < 0 || y < 0 || c < 0 || x >= im->w || y >= im->h || c >= im->c)) {
+		im->data[c * im->h * im->w + y * im->w + x] = val;
+	}
+
+}
+
 Image *image_grayscale (Image *input) {
 
 	Image *gray = image_create (input->w, input->h, 1);
@@ -202,6 +218,50 @@ Image *image_grayscale (Image *input) {
 	}
 
 	return gray;
+
+}
+
+void image_rgb_to_hsv (Image *im) {
+
+	if (im->c == 3) {
+		int i = 0, j = 0;
+		float r = 0, g = 0, b = 0;
+		float h = 0, s = 0, v = 0;
+		for (j = 0; j < im->h; j++) {
+			for (i = 0; i < im->w; i++) {
+				r = image_get_pixel (im, i , j, 0);
+				g = image_get_pixel (im, i , j, 1);
+				b = image_get_pixel (im, i , j, 2);
+
+				float max = three_way_max (r, g, b);
+				float min = three_way_min (r, g, b);
+				float delta = max - min;
+
+				v = max;
+
+				if (max == 0) {
+					s = 0;
+					h = 0;
+				}
+
+				else {
+					s = delta / max;
+
+					if (r == max) h = (g - b) / delta;
+					else if (g == max) h = 2 + (b - r) / delta;
+					else h = 4 + (r - g) / delta;
+
+					if (h < 0) h += 6;
+
+					h = h / 6.0;
+				}
+
+				image_set_pixel (im, i, j, 0, h);
+				image_set_pixel (im, i, j, 1, s);
+				image_set_pixel (im, i, j, 2, v);
+			}
+		}
+	}
 
 }
 

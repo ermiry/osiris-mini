@@ -33,7 +33,17 @@ extern Image *image_load_color (
 	const char *filename, int w, int h
 );
 
+extern float image_get_pixel (
+	Image *im, int x, int y, int c
+);
+
+extern void image_set_pixel (
+	Image *im, int x, int y, int c, float val
+);
+
 extern Image *image_grayscale (Image *input);
+
+extern void image_rgb_to_hsv (Image *im);
 
 extern int image_save (Image *im, const char *name);
 
