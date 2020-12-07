@@ -20,6 +20,11 @@ extern Image *image_create (
 	int w, int h, int c
 );
 
+extern Image *image_load_mem (
+	const unsigned char *buffer, int buffer_len,
+	int w, int h, int c
+);
+
 extern Image *image_load (
 	const char *filename, int w, int h, int c
 );
