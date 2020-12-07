@@ -33,4 +33,8 @@ extern Image *image_load_color (
 	const char *filename, int w, int h
 );
 
+extern Image *image_grayscale (Image *input);
+
+extern int image_save (Image *im, const char *name);
+
 #endif

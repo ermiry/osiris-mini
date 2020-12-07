@@ -3,7 +3,10 @@
 #include "osiris/image.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "osiris/stb/stb_image.h"
+#include "osiris/stb/image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "osiris/stb/image_write.h"
 
 Image *image_new (void) {
 
@@ -93,7 +96,7 @@ static Image *image_load_mem_stb (
 		}
 
 		else {
-			osiris_log_error ("Failed to load image from file!");
+			// osiris_log_error ("Failed to load image from file!");
 			#ifdef OSIRIS_DEBUG
 			fprintf (stderr, "STB Reason: %s\n", stbi_failure_reason ());
 			#endif
@@ -179,5 +182,47 @@ Image *image_load (const char *filename, int w, int h, int c) {
 Image *image_load_color (const char *filename, int w, int h) {
 
 	return filename ? image_load (filename, w, h, 3) : NULL;
+
+}
+
+Image *image_grayscale (Image *input) {
+
+	Image *gray = image_create (input->w, input->h, 1);
+	if (gray) {
+		float scale[] = { 0.299, 0.587, 0.114 };
+		int i = 0, j = 0, k = 0;
+		for (k = 0; k < input->c; k++) {
+			for (j = 0; j < input->h; j++) {
+				for (i = 0; i < input->w; i++) {
+					gray->data[i + input->w * j] +=
+						(scale[k] * input->data[k * input->h * input->w + j * input->w + i]);
+				}
+			}
+		}
+	}
+
+	return gray;
+
+}
+
+int image_save (Image *im, const char *name) {
+
+	int retval = 1;
+
+	if (im) {
+		unsigned char *data = calloc (im->w * im->h * im->c, sizeof (char));
+		int i = 0, k = 0;
+		for (k = 0; k < im->c; k++){
+			for (i = 0; i < im->w * im->h; i++) {
+				data[i * im->c + k] = (unsigned char) (255 * im->data[i + k* im->w * im->h]);
+			}
+		}
+
+		retval = stbi_write_jpg (name, im->w, im->h, im->c, data, 80);
+
+		free (data);
+	}
+
+	return retval;
 
 }
