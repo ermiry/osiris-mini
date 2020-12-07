@@ -10,12 +10,18 @@ int main (int argc, const char **argv) {
 
 		Image *input = image_load_color (argv[1], 0, 0);
 
-		Image *gray = image_grayscale (input);
+		if (input) {
+			Image *gray = image_grayscale (input);
+			if (gray) {
+				if (!image_save (gray, argv[2])) {
+					(void) printf ("Done!\n\n");
+				}
 
-		image_save (gray, argv[2]);
+				image_delete (gray);
+			}
 
-		image_delete (gray);
-		image_delete (input);
+			image_delete (input);
+		}
 	}
 
 	else {
