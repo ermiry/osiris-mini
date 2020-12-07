@@ -12,6 +12,10 @@ INCDIR      := include
 BUILDDIR    := objs
 TARGETDIR   := bin
 
+TESTDIR		:= test
+TESTBUILD	:= $(TESTDIR)/objs
+TESTTARGET	:= $(TESTDIR)/bin
+
 SRCEXT      := c
 DEPEXT      := d
 OBJEXT      := o
@@ -21,8 +25,14 @@ LIB         := -L /usr/local/lib $(PTHREAD) $(MATH)
 INC         := -I $(INCDIR) -I /usr/local/include
 INCDEP      := -I $(INCDIR)
 
+TESTFLAGS	:= -g $(DEFINES) -Wall -Wno-unknown-pragmas
+TESTLIBS	:= -L ./bin -l osiris
+
 SOURCES     := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
+
+TESTS		:= $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
+TESTOBJS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTS:.$(SRCEXT)=.$(OBJEXT)))
 
 all: directories $(SLIB)
 
@@ -33,6 +43,8 @@ directories:
 clean:
 	@$(RM) -rf $(BUILDDIR) 
 	@$(RM) -rf $(TARGETDIR)
+	@$(RM) -rf $(TESTBUILD)
+	@$(RM) -rf $(TESTTARGET)
 
 # pull in dependency info for *existing* .o files
 -include $(OBJECTS:.$(OBJEXT)=.$(DEPEXT))
@@ -51,4 +63,18 @@ $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.$(DEPEXT)
 	@rm -f $(BUILDDIR)/$*.$(DEPEXT).tmp
 
-.PHONY: all clean
+test: $(TESTOBJS)
+	@mkdir -p ./$(TESTTARGET)
+	$(CC) -I ./$(INCDIR) -L ./$(TARGETDIR) ./$(TESTBUILD)/gray.o -o ./$(TESTTARGET)/gray -l osiris
+
+# compile tests
+$(TESTBUILD)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
+	@mkdir -p $(dir $@)
+	$(CC) $(TESTFLAGS) $(INC) $(TESTLIBS) -c -o $@ $<
+	@$(CC) $(TESTFLAGS) $(INCDEP) -MM $(TESTDIR)/$*.$(SRCEXT) > $(TESTBUILD)/$*.$(DEPEXT)
+	@cp -f $(TESTBUILD)/$*.$(DEPEXT) $(TESTBUILD)/$*.$(DEPEXT).tmp
+	@sed -e 's|.*:|$(TESTBUILD)/$*.$(OBJEXT):|' < $(TESTBUILD)/$*.$(DEPEXT).tmp > $(TESTBUILD)/$*.$(DEPEXT)
+	@sed -e 's/.*://' -e 's/\\$$//' < $(TESTBUILD)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(TESTBUILD)/$*.$(DEPEXT)
+	@rm -f $(TESTBUILD)/$*.$(DEPEXT).tmp
+
+.PHONY: all test clean
