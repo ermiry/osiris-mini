@@ -36,6 +36,14 @@ TESTOBJS	:= $(patsubst $(TESTDIR)/%,$(TESTBUILD)/%,$(TESTS:.$(SRCEXT)=.$(OBJEXT)
 
 all: directories $(SLIB)
 
+install: $(SLIB)
+	install -m 644 ./bin/libosiris.so /usr/local/lib/
+	cp -R ./include/osiris /usr/local/include
+
+uninstall:
+	rm /usr/local/lib/libosiris.so
+	rm -r /usr/local/include/osiris
+
 directories:
 	@mkdir -p $(TARGETDIR)
 	@mkdir -p $(BUILDDIR)
