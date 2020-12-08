@@ -67,6 +67,8 @@ test: $(TESTOBJS)
 	@mkdir -p ./$(TESTTARGET)
 	$(CC) -I ./$(INCDIR) -L ./$(TARGETDIR) ./$(TESTBUILD)/gray.o -o ./$(TESTTARGET)/gray -l osiris
 	$(CC) -I ./$(INCDIR) -L ./$(TARGETDIR) ./$(TESTBUILD)/rgb2hsv.o -o ./$(TESTTARGET)/rgb2hsv -l osiris
+	$(CC) -I ./$(INCDIR) -L ./$(TARGETDIR) ./$(TESTBUILD)/shift.o -o ./$(TESTTARGET)/shift -l osiris
+	$(CC) -I ./$(INCDIR) -L ./$(TARGETDIR) ./$(TESTBUILD)/clamp.o -o ./$(TESTTARGET)/clamp -l osiris
 
 # compile tests
 $(TESTBUILD)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
