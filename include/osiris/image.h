@@ -43,6 +43,10 @@ extern void image_set_pixel (
 
 extern Image *image_grayscale (Image *input);
 
+extern void image_shift (Image *im, int c, float v);
+
+extern void image_clamp (Image *im);
+
 extern void image_rgb_to_hsv (Image *im);
 
 extern int image_save (Image *im, const char *name);

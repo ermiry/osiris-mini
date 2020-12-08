@@ -221,6 +221,26 @@ Image *image_grayscale (Image *input) {
 
 }
 
+void image_shift (Image *im, int c, float v) {
+
+	unsigned int stop = (c + 1) * im->w * im->h;
+	for (unsigned int i = c * im->w * im->h; i < stop; i++) {
+		im->data[i] += v;
+	}
+
+}
+
+void image_clamp (Image *im) {
+
+	unsigned int stop = im->w * im->h * im->c;
+	for (int x = 0; x < stop; x++) {
+		if (im->data[x] > 1) im->data[x] = 1;
+		else if (im->data[x] < 0)
+			im->data[x] = 0;
+	}
+
+}
+
 void image_rgb_to_hsv (Image *im) {
 
 	if (im->c == 3) {
